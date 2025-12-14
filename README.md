@@ -27,12 +27,12 @@ docker compose -f docker-compose.yaml up --build -d
 ### Directory Structure
 
 .
- * [dir1](./laravel_docker)
-   * [dir2](./docker)
-      * [dir4](./nginx)
-	     * [default.conf](./dir1/dir2/dir4/default.conf)
-      * [dir5](./php)
-	     * [default.conf](./dir1/dir2/dir5/default.conf)
+ * [laravel_docker](./laravel_docker)
+   * [docker](./docker)
+      * [nginx](./nginx)
+	     * [default.conf](./laravel_docker/docker/nginx/default.conf)
+      * [php](./php)
+	     * [default.conf](./laravel_docker/docker/php/default.conf)
    * [dir3](./src)
  * [.env](./.env)
  * [README.md](./README.md)
