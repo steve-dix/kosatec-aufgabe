@@ -49,7 +49,7 @@ Sobald Sie die Docker-Container gestartet haben, können Sie auf die Anwendung z
 ```
 http://localhost:8080
 ```
-# TO-DO
+### TO-DO
 Aufgrund von Zeitmangel (und Problemen mit Laravel Mix/Vite unter Docker) wurden eine Reihe von Funktionen nicht implementiert.  
 
 * Die Update-Funktion funktioniert noch nicht.
@@ -110,7 +110,7 @@ You should now have a complete laravel installation, and can exit the docker she
 http://localhost:8080
 ```
 
-###TO-DO
+### TO-DO
 Due to time limitations (and problems with Laravel mix/Vite under docker), A number of features were not implemented.  
 
 * The Update function does not work.
