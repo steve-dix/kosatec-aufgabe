@@ -1,13 +1,13 @@
-#Notizen
+# Notizen
 
-##English
+## English
 
 This repository contains the vue.js / Laravel application as requested
 by Kosatec.  This comes with a complete Docker configuration to produce
 a laravel_docker containing nginx, php 8.2 and mysql.
 
 
-###Installation
+### Installation
 Create a separate subdirectory, and clone the repository into there.  
 
 ```
@@ -24,7 +24,7 @@ docker compose -f docker-compose.yaml up --build -d
 
 ```
 
-###Directory Structure
+### Directory Structure
 
 .
  * [dir1](./laravel_docker)
