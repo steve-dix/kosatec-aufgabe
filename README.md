@@ -1,5 +1,58 @@
 # Notizen
 
+## German
+Dieses Repository enthält die vue.js / Laravel-Anwendung, wie von Kosatec
+gewünscht. Es wird mit einer vollständigen Docker-Konfiguration geliefert, 
+um ein `laravel_docker` mit nginx, PHP 8.2 und MySQL bereitzustellen.
+
+### Installation
+Erstellen Sie ein separates Unterverzeichnis und klonen Sie das Repository dort hinein:
+```
+git clone https://github.com/steve-dix/kosatec-aufgabe.git
+```
+
+Es gibt nur einen Branch, `main`, daher müssen Sie nichts anderes auschecken.
+
+Vorausgesetzt, Sie haben Docker installiert, können die Container mit dem
+folgenden Befehl erstellt werden:
+```
+docker compose -f docker-compose.yaml up --build -d
+```
+
+Sobald die Container erstellt wurden, müssen Sie den PHP-Container betreten
+mit den folgenden Befehlen:
+```
+cd laravel-docker
+  docker-compose exec -it php bash
+  php artisan key:generate
+  php artisan migrate
+  npm install
+```
+
+Sie sollten jetzt eine vollständige Laravel-Installation haben und können die
+Docker-Shell wieder verlassen.
+
+### Verzeichnisstruktur
+
+.
+ * [laravel_docker](./laravel_docker)
+   * [docker](./docker)
+      * [nginx](./nginx)
+	     * [default.conf](./laravel_docker/docker/nginx/default.conf)
+      * [php](./php)
+	     * [default.conf](./laravel_docker/docker/php/default.conf)
+   * [src](./src)
+ * [.env](./.env)
+ * [README.md](./README.md)
+ 
+### Nutzung
+
+Sobald Sie die Docker-Container gestartet haben, können Sie auf die
+Anwendung zugreifen über:
+```
+http://localhost:8080
+```
+
 ## English
 
 This repository contains the vue.js / Laravel application as requested
@@ -21,8 +74,21 @@ the following command.
 
 ```
 docker compose -f docker-compose.yaml up --build -d
+```
+
+Once you have built the containers, you must enter the php container
+With the following commands :
 
 ```
+cd laravel-docker
+docker-compose exec -it php bash
+   php artisan key:generate
+   php artisan migrate
+   npm install
+```
+
+You should now have a complete laravel installation, and can exit the 
+docker shell.
 
 ### Directory Structure
 
@@ -33,6 +99,18 @@ docker compose -f docker-compose.yaml up --build -d
 	     * [default.conf](./laravel_docker/docker/nginx/default.conf)
       * [php](./php)
 	     * [default.conf](./laravel_docker/docker/php/default.conf)
-   * [dir3](./src)
+   * [src](./src)
  * [.env](./.env)
  * [README.md](./README.md)
+ 
+ ### Use
+ 
+ Once you have started the Docker containers, you will be able to 
+ access the application through
+ 
+```
+http://localhost:8080
+```
+
+
+ 
