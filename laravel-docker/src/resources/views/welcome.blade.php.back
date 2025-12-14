@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Notizen</title>
+		<link rel="stylesheet" href="css/app.css">
+		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	</head>
+	<body>
+		<h2 id="title">Notizen</h2>
+		
+		<div id="app">
+		<notizen
+			:notizen="notizen"
+			:page="page"
+			:maxpage="maxpage"
+			:disabled="disabled"
+			:notiz="notiz"
+			:showform="showform"
+			:errors="errors"
+			@edit="editNotiz"
+			@delete="deleteAddress"
+			@firstPage="firstPage"
+			@previousPage="previousPage"
+			@nextPage="nextPage"
+			@lastPage="lastPage"
+			@showForm="showform = $event"
+		></notizen>
+		</div>
+		@verbatim
+		<script type="module">
+			const { createApp } = Vue;
+			const Notizen = {
+				props: ['notizen', 'page', 'maxpage', 'disabled'],
+				emits: ['edit','delete','firstPage','previousPage','nextPage','lastPage','showForm'],
+				template: `
+				<div id="list">
+					<button @click="showform=2">New Entry</button>
+					<table>
+						<thead>
+							<tr><th>Titel</th><th>Inhalt</th><th>Erstellungsdatum</th><th>Wichtig</th><th>Seite {{page}} von {{maxpage}}</th></tr>
+						</thead>
+						<tbody>
+						test
+							<tr v-for="notiz in notizen">
+								<td>{{ notiz.titel }}</td>
+								<td>{{ notiz.inhalt }}</td>
+								<td>{{ notiz.erstellungsdatum }}</td>
+								<td>{{ notiz.wichtig }}</td>
+								<td>
+									<button @click="$emit('edit', notiz.id)">Edit</button>&nbsp;
+									<button @click="$emit('delete', notiz.id)">Del</button>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<th colspan="5">
+									<button class="paging" :disabled="page<2" :class="{'disable-input': disabled}" @click="firstPage()">⇧</button>
+									<button class="paging" :disabled="page<2" :class="{'disable-input': disabled}" @click="previousPage()">⇦</button>
+									<button class="paging" :disabled="page == maxpage" :class="{'disable-input': disabled}" @click="nextPage()">⇨</button>
+									<button class="paging" :disabled="page == maxpage" :class="{'disable-input': disabled}" @click="lastPage()">⇩</button>
+								</th>
+							</tr>								
+						</tfoot>
+					</table>
+					
+				</div>
+				<div id="form" v-if="showform">
+					<div id="formblock">
+						<fieldset id="errors" v-if="errors.length">
+							<legend>Errors</legend>
+							<span v-for="err in errors">
+								@{{err.msg}}<br/>
+							</span>
+						</fieldset>
+						<fieldset id="formstyle">
+							<legend>Address</legend>
+							<form v-on:submit.prevent="if(showform==1) submitNotiz(notiz); else postNotiz(notiz);">
+								<input type="hidden" name="notizID" v-model="notiz.notizID"/>
+								<label>Titel</label><br/>
+								<input type="text" v-model="notiz.titel" placeholder="Der Titel"/><br/>
+								<label>Inhalt</label><br/>
+								<textarea v-model="notiz.inhalt" rows=8 cols=30></textarea><br/>
+								<label>Erstellungsdatum</label><br/>
+								<input type="text" v-model="notiz.datum" placeholder="Datum dd.mm.yyyy"/><br/>
+								<label>Email</label><br/>
+								<button type="submit">Submit</button><button type="cancel" @click="showform=false">Cancel</button>
+							</form>
+						</fieldset>
+					</div>
+				</div>
+				`
+				};
+				
+				const app = Vue.createApp({
+					data() {
+						return {
+							notizen: [],
+							notiz: {notizID: 0, titel:'', inhalt: '', erstellungsdatum:'', wichtig:'N'},
+							errors: [],
+							showform : false,
+							showerr : false,
+							page: 1,
+							maxpage: -1,
+							notizCount: 0,
+							disabled:false
+						}
+					},
+
+					methods: {
+						nextPage: function() {		// get the next page of addresses
+							this.page++;
+							this.getNotizCount();
+							this.getNotizen();
+						},
+						previousPage: function() {	// get the previous page of addresses
+							this.page--;
+							this.getNotizCount();
+							this.getNotizen();
+						},
+						firstPage: function() {		// jump back to the first page of addresses
+							this.page=1;
+							this.getNotizCount();
+							this.getNotizen();
+						},
+						lastPage: function() {		// jump to the last page of addresses
+							this.getNotizCount();
+							this.page = this.maxpage;
+							this.getNotizen();
+						},
+						getNotizCount: function() {	// get the total number of addresses in the addressbook and calculate pages
+							axios.get("http://localhost:8080/api/notiz/count")
+							.then(response => {
+								this.notizCount = parseInt(response.data);
+								this.maxpage = Math.floor(this.notizCount / 12) + ((this.notizCount % 12 > 0) ? 1 : 0);	
+							})
+						},
+						getNotizen: function() {		// get the current page
+							axios.get("http://localhost:8080/api/notiz/pg/"+this.page)
+							.then(response => {
+								this.notizen = response.data.data;
+							})
+						},
+						editNotiz: function(id) {		// edit an entry
+							axios.get("http://localhost:8080/api/notiz/" + parseInt(id))
+							.then(response => {
+								this.notiz = response.data[0];
+								this.showform = true;
+							})
+						},
+						submitNotiz: function(notiz) {	// write an updated notiz
+							axios.put("http://localhost:8080/api/notiz/" + parseInt(notiz.notizID),notiz)
+							.then(response => {
+								if( !(typeof response.data.errors === 'undefined')) {
+									errors = response.data.errors;
+									if(errors.length !=0) {
+										this.showerr = true;
+										this.errors = errors;
+										return;
+									}
+								} else {
+									// erase the notiz form once finished updating
+									this.notiz = {notizID: 0, titel:'', inhalt: '', erstellungsdatum:'', wichtig:'N'};
+									this.errors = [];	// erase all errors from the submission area
+									alert("Erfolgreich");	// alert user, pause
+									this.showform = false;	//erase the form
+									this.getNotiz();	// update the page
+									this.getNotizCount();
+								}
+							})
+						},
+						postNotiz: function(notiz) {		// write a new address into the addressbook
+							axios.post("http://localhost:8080/api/notiz/",notiz)
+							.then(response => {
+								if( !(typeof response.data.errors === 'undefined')) {
+									errors = response.data.errors;
+									if(errors.length != 0) {
+										this.showerr = true;
+										this.errors = errors;
+										return;
+									}
+								} else {
+									this.notiz = {notizID: 0, titel:'', inhalt: '', erstellungsdatum:'', wichtig:'N'};
+									this.errors = [];
+									alert("Efolgreich");
+									this.showform = false;
+									this.getNotiz();	// update the page
+									this.getNotizCount();
+								}
+							})
+						},
+						deleteAddress: function(notiz) {		// delete a reocrd
+							if(confirm("Sind Sie sicher??")){		
+								axios.delete("http://localhost:8080/api/notiz/"+parseInt(notiz))
+								.then(response => {
+									this.getNotiz();	// update the page
+									this.getNotizCount();
+								});
+							} else {
+								alert("Delete aborted");
+							}
+						}
+					},
+					created() {		// on startup, get the first page of notes after getting the size of the db and calculating the pages
+						this.getNotizCount();
+						this.getNotizen();
+					}
+				}
+			);
+			app.component('notizen', Notizen);
+			app.mount('#app');
+			
+
+		</script>
+		
+@endverbatim
+		</div>
+
+	</body>
+</html>
